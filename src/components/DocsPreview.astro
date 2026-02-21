@@ -1,0 +1,45 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  docs: CollectionEntry<'docs'>[];
+}
+
+const { docs } = Astro.props;
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const toSlug = (id: string) => id.replace(/\.(md|mdx)$/i, '');
+const previewItems = docs.slice(0, 3);
+const showMoreCard = docs.length > 3;
+---
+
+<section>
+  <div class="section-heading">
+    <div>
+      <p class="section-label">Integration Blueprints</p>
+      <h2>Architecture documentation for connectors, webhooks, queues, and replay-safe data flows.</h2>
+    </div>
+  </div>
+
+  <div class="feature-grid docs-grid">
+    {
+      previewItems.map((doc) => (
+        <article class="surface-card">
+          <p class="meta-line">{doc.data.category}</p>
+          <h3><a href={`${base}docs/${toSlug(doc.id)}/`}>{doc.data.title}</a></h3>
+          <p>{doc.data.description}</p>
+          <div class="chip-row">
+            {doc.data.tags.map((tag) => <span class="chip">{tag}</span>)}
+          </div>
+        </article>
+      ))
+    }
+    {
+      showMoreCard && (
+        <a href={`${base}docs/`} class="more-card">
+          <span>Read integration blueprints →</span>
+        </a>
+      )
+    }
+  </div>
+</section>

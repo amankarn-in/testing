@@ -1,0 +1,21 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  enableMermaid?: boolean;
+}
+
+const { title, description, enableMermaid = false } = Astro.props;
+const hasSidebar = Astro.slots.has('sidebar');
+---
+
+<BaseLayout title={title} description={description} enableMermaid={enableMermaid}>
+  <div class:list={["content-layout", hasSidebar && 'with-sidebar']}>
+    {hasSidebar && <aside class="content-sidebar"><slot name="sidebar" /></aside>}
+    <article class="content-article">
+      <slot />
+    </article>
+  </div>
+</BaseLayout>

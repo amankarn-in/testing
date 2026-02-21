@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+);
+const tags = Array.from(new Set(posts.flatMap((post) => post.data.tags))).sort((a, b) => a.localeCompare(b));
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const toSlug = (id: string) => id.replace(/\.(md|mdx)$/i, '');
+---
+
+<BaseLayout title="Blog | Senior Odoo Integration Engineer" description="Integration engineering articles on Odoo, connector reliability, and architecture patterns.">
+  <section>
+    <p class="section-label">Blog</p>
+    <h1>Architecture notes from production integration systems.</h1>
+  </section>
+
+  <section>
+    <div class="tag-filter-bar" aria-label="Filter posts by tag">
+      <button type="button" data-tag="all" class="tag-filter active">All</button>
+      {tags.map((tag) => <button type="button" data-tag={tag.toLowerCase()} class="tag-filter">{tag}</button>)}
+    </div>
+
+    <div class="feature-grid blog-grid" id="blog-items">
+      {
+        posts.map((post) => (
+          <article class="surface-card filter-item" data-tags={post.data.tags.map((tag) => tag.toLowerCase()).join(',')}>
+            <p class="meta-line">{post.data.pubDate.toLocaleDateString('en-US', { dateStyle: 'medium' })}</p>
+            <h2><a href={`${base}blog/${toSlug(post.id)}/`}>{post.data.title}</a></h2>
+            <p>{post.data.description}</p>
+            <div class="chip-row">
+              {post.data.tags.map((tag) => <span class="chip">{tag}</span>)}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  (() => {
+    const filters = Array.from(document.querySelectorAll('.tag-filter'));
+    const items = Array.from(document.querySelectorAll('.filter-item'));
+
+    const applyTag = (tag) => {
+      items.forEach((item) => {
+        const itemTags = item.getAttribute('data-tags')?.split(',') ?? [];
+        item.style.display = tag === 'all' || itemTags.includes(tag) ? '' : 'none';
+      });
+
+      filters.forEach((button) => {
+        button.classList.toggle('active', button.getAttribute('data-tag') === tag);
+      });
+
+      const url = new URL(window.location.href);
+      if (tag === 'all') {
+        url.searchParams.delete('tag');
+      } else {
+        url.searchParams.set('tag', tag);
+      }
+      history.replaceState({}, '', url);
+    };
+
+    filters.forEach((button) => {
+      button.addEventListener('click', () => {
+        applyTag(button.getAttribute('data-tag') ?? 'all');
+      });
+    });
+
+    const initialTag = new URL(window.location.href).searchParams.get('tag') ?? 'all';
+    const valid = filters.some((button) => button.getAttribute('data-tag') === initialTag);
+    applyTag(valid ? initialTag : 'all');
+  })();
+</script>

@@ -1,0 +1,16 @@
+---
+const layers = ['Odoo Core', 'Webhook Engine', 'Queue Worker', 'Snowflake / HubSpot'];
+---
+
+<aside class="architecture-card" aria-label="Integration architecture flow">
+  <p class="section-label">Reference Architecture</p>
+  <div class="architecture-stack">
+    {
+      layers.map((layer) => (
+        <div class="architecture-layer">
+          <span>{layer}</span>
+        </div>
+      ))
+    }
+  </div>
+</aside>

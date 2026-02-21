@@ -1,0 +1,35 @@
+---
+const items = [
+  {
+    period: '2025 - Present',
+    title: 'Odoo Integration Engineer — Webkul',
+    summary: 'Built and customized Odoo integrations for production ERP workflows, with focus on connector reliability and maintainability.'
+  },
+  {
+    period: '2023 - 2025',
+    title: 'Backend Integration Engineer',
+    summary: 'Implemented multi-CRM connectors across HubSpot, Zoho, Pipedrive, and vtiger using webhook and queue-first processing patterns.'
+  },
+  {
+    period: '2021 - 2023',
+    title: 'ERP Data & Analytics Engineer',
+    summary: 'Delivered OpenCart to Odoo and Power BI integrations, plus Snowflake pipelines with reconciliation and replay-safe controls.'
+  }
+];
+---
+
+<section>
+  <p class="section-label">Experience Timeline</p>
+  <h2>Integration work focused on reliability, replay safety, and long-term maintenance.</h2>
+  <div class="timeline">
+    {
+      items.map((item) => (
+        <article class="timeline-item">
+          <p class="timeline-period">{item.period}</p>
+          <h3>{item.title}</h3>
+          <p>{item.summary}</p>
+        </article>
+      ))
+    }
+  </div>
+</section>

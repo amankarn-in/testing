@@ -1,0 +1,105 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  enableMermaid?: boolean;
+}
+
+const {
+  title = 'Senior Odoo Integration Engineer',
+  description = 'Personal engineering notes and architecture documentation by Aman Karn.',
+  enableMermaid = false
+} = Astro.props;
+
+const site = Astro.site ?? new URL('https://amankarn.github.io');
+const canonical = new URL(Astro.url.pathname, site).toString();
+const rawBaseUrl = import.meta.env.BASE_URL;
+const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
+const withBase = (path = '') => `${baseUrl}${path.replace(/^\//, '')}`;
+const currentPath = Astro.url.pathname;
+
+const navLinks = [
+  { href: withBase(''), label: 'Home' },
+  { href: withBase('blog/'), label: 'Blog' },
+  { href: withBase('docs/'), label: 'Docs' },
+  { href: withBase('contact/'), label: 'Contact' }
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#0f0f12" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={withBase('rss.xml')} />
+    <link rel="sitemap" type="application/xml" href={withBase('sitemap-index.xml')} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-shell">
+        <a href={baseUrl} class="brand">Aman Karn — Integration Engineering</a>
+        <nav aria-label="Primary navigation">
+          <ul class="nav-list">
+            {
+              navLinks.map((link) => {
+                const isActive =
+                  currentPath === link.href ||
+                  (link.href !== baseUrl && currentPath.startsWith(link.href));
+                return (
+                  <li>
+                    <a href={link.href} class={isActive ? 'active' : undefined}>{link.label}</a>
+                  </li>
+                );
+              })
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container main-shell">
+      <slot />
+    </main>
+
+    <footer class="site-footer container">
+      <span>© {new Date().getFullYear()} Senior Odoo Integration Engineer</span>
+      <span class="footer-links">
+        <a href={withBase('rss.xml')}>RSS</a>
+        <a href={withBase('sitemap-index.xml')}>Sitemap</a>
+      </span>
+    </footer>
+
+    {
+      enableMermaid && (
+        <script type="module" is:inline>
+          import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+          mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+              primaryColor: '#0f0f12',
+              primaryBorderColor: '#2a2a2a',
+              primaryTextColor: '#e6edf3',
+              lineColor: '#7aa2ff',
+              fontFamily: 'Inter, system-ui, sans-serif'
+            },
+            flowchart: { curve: 'basis', padding: 12 }
+          });
+        </script>
+      )
+    }
+  </body>
+</html>

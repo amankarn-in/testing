@@ -1,0 +1,45 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { posts } = Astro.props;
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const toSlug = (id: string) => id.replace(/\.(md|mdx)$/i, '');
+const previewItems = posts.slice(0, 3);
+const showMoreCard = posts.length > 3;
+---
+
+<section>
+  <div class="section-heading">
+    <div>
+      <p class="section-label">Engineering Notes</p>
+      <h2>Implementation decisions, failure cases, and reliability patterns from my integration work.</h2>
+    </div>
+  </div>
+
+  <div class="feature-grid blog-grid">
+    {
+      previewItems.map((post) => (
+        <article class="surface-card">
+          <p class="meta-line">{post.data.pubDate.toLocaleDateString('en-US', { dateStyle: 'medium' })}</p>
+          <h3><a href={`${base}blog/${toSlug(post.id)}/`}>{post.data.title}</a></h3>
+          <p>{post.data.description}</p>
+          <div class="chip-row">
+            {post.data.tags.map((tag) => <span class="chip">{tag}</span>)}
+          </div>
+        </article>
+      ))
+    }
+    {
+      showMoreCard && (
+        <a href={`${base}blog/`} class="more-card">
+          <span>Browse all notes →</span>
+        </a>
+      )
+    }
+  </div>
+</section>

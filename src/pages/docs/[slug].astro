@@ -1,0 +1,70 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('docs', ({ data }) => !data.draft);
+  const toSlug = (id: string) => id.replace(/\.(md|mdx)$/i, '');
+  return docs.map((doc) => ({
+    params: { slug: toSlug(doc.id) },
+    props: { doc }
+  }));
+}
+
+const { doc } = Astro.props as { doc: CollectionEntry<'docs'> };
+
+const allDocs = (await getCollection('docs', ({ data }) => !data.draft)).sort((a, b) => {
+  const categorySort = a.data.category.localeCompare(b.data.category);
+  return categorySort !== 0 ? categorySort : a.data.title.localeCompare(b.data.title);
+});
+
+const grouped = allDocs.reduce<Record<string, CollectionEntry<'docs'>[]>>((acc, entry) => {
+  const key = entry.data.category;
+  const bucket = acc[key] ?? [];
+  bucket.push(entry);
+  acc[key] = bucket;
+  return acc;
+}, {});
+
+const { Content } = await render(doc);
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const currentSlug = doc.id.replace(/\.(md|mdx)$/i, '');
+---
+
+<ContentLayout title={`${doc.data.title} | Docs`} description={doc.data.description} enableMermaid>
+  <Fragment slot="sidebar">
+    <h2>Docs</h2>
+    {
+      Object.entries(grouped).map(([category, entries]) => (
+        <section>
+          <p class="meta-line">{category}</p>
+          <ul class="sidebar-list">
+            {
+              entries.map((entry) => {
+                const slug = entry.id.replace(/\.(md|mdx)$/i, '');
+                const href = `${base}docs/${slug}/`;
+                return (
+                  <li>
+                    <a href={href} class={slug === currentSlug ? 'active' : undefined}>{entry.data.title}</a>
+                  </li>
+                );
+              })
+            }
+          </ul>
+        </section>
+      ))
+    }
+  </Fragment>
+
+  <p><a href={`${base}docs/`}>← Back to Docs</a></p>
+  <p class="meta-line">{doc.data.category}</p>
+  <h1>{doc.data.title}</h1>
+  <p>{doc.data.description}</p>
+  <div class="chip-row">
+    {doc.data.tags.map((tag) => <span class="chip">{tag}</span>)}
+  </div>
+  <hr />
+  <Content />
+</ContentLayout>

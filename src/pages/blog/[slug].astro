@@ -1,0 +1,31 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const toSlug = (id: string) => id.replace(/\.(md|mdx)$/i, '');
+  return posts.map((post) => ({
+    params: { slug: toSlug(post.id) },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props as { post: CollectionEntry<'blog'> };
+const { Content } = await render(post);
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+---
+
+<ContentLayout title={`${post.data.title} | Blog`} description={post.data.description}>
+  <p><a href={`${base}blog/`}>← Back to Blog</a></p>
+  <p class="meta-line">{post.data.pubDate.toLocaleDateString('en-US', { dateStyle: 'long' })}</p>
+  <h1>{post.data.title}</h1>
+  <p>{post.data.description}</p>
+  <div class="chip-row">
+    {post.data.tags.map((tag) => <span class="chip">{tag}</span>)}
+  </div>
+  <hr />
+  <Content />
+</ContentLayout>

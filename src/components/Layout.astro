@@ -1,0 +1,86 @@
+---
+import Navbar from './Navbar.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  enableMermaid?: boolean;
+}
+
+const {
+  title = 'Senior Odoo Integration Engineer | Portfolio',
+  description = 'Portfolio, technical docs, and implementation blog focused on Odoo integrations and automation.',
+  enableMermaid = false
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? new URL('https://amankarn.github.io')).toString();
+const feedUrl = `${import.meta.env.BASE_URL}rss.xml`;
+const sitemapUrl = `${import.meta.env.BASE_URL}sitemap-index.xml`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={feedUrl} />
+    <link rel="sitemap" type="application/xml" href={sitemapUrl} />
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem('theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = saved ?? (systemDark ? 'dark' : 'light');
+      })();
+    </script>
+  </head>
+  <body>
+    <Navbar />
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="site-footer container">
+      <p>© {new Date().getFullYear()} Senior Odoo Integration Engineer</p>
+      <p>
+        <a href={feedUrl}>RSS</a>
+        <span aria-hidden="true">·</span>
+        <a href={sitemapUrl}>Sitemap</a>
+      </p>
+    </footer>
+
+    {
+      enableMermaid && (
+        <script type="module" is:inline>
+          import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+          mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: 'loose',
+            theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default'
+          });
+
+          document.querySelectorAll('pre code.language-mermaid').forEach((code, index) => {
+            const pre = code.parentElement;
+            if (!pre) return;
+            const graph = code.textContent ?? '';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mermaid';
+            wrapper.id = `mermaid-${index}`;
+            wrapper.textContent = graph;
+            pre.replaceWith(wrapper);
+          });
+
+          mermaid.run({ querySelector: '.mermaid' });
+        </script>
+      )
+    }
+  </body>
+</html>

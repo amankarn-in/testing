@@ -1,0 +1,46 @@
+---
+const baseUrl = import.meta.env.BASE_URL;
+const pathname = Astro.url.pathname;
+
+const links = [
+  { href: `${baseUrl}`, label: 'Home' },
+  { href: `${baseUrl}about/`, label: 'About' },
+  { href: `${baseUrl}blog/`, label: 'Blog' },
+  { href: `${baseUrl}docs/`, label: 'Docs' },
+  { href: `${baseUrl}contact/`, label: 'Contact' }
+];
+---
+
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href={baseUrl}>Aman Karn</a>
+    <nav aria-label="Main">
+      <ul class="nav-links">
+        {
+          links.map((link) => {
+            const isActive = pathname === link.href || (link.href !== baseUrl && pathname.startsWith(link.href));
+            return (
+              <li>
+                <a href={link.href} class={isActive ? 'active' : undefined}>{link.label}</a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </nav>
+    <button id="theme-toggle" type="button" aria-label="Toggle color theme">Theme</button>
+  </div>
+</header>
+
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    const button = document.getElementById('theme-toggle');
+
+    button?.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      localStorage.setItem('theme', next);
+    });
+  })();
+</script>
