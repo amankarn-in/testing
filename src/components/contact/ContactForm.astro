@@ -1,0 +1,222 @@
+---
+// Public endpoint only. Worker route should be mounted at /contact in production.
+const endpoint = import.meta.env.PUBLIC_CONTACT_PROXY_URL ?? '/contact';
+---
+
+<article class="surface-card contact-form-v2" aria-label="Contact form">
+  <h2>Message Pipeline</h2>
+  <form id="contact-form-v2" data-endpoint={endpoint} novalidate>
+    <div class="field-grid">
+      <label for="contact-name">name</label>
+      <input id="contact-name" name="name" type="text" autocomplete="name" required />
+    </div>
+
+    <div class="field-grid">
+      <label for="contact-email">email</label>
+      <input id="contact-email" name="email" type="email" autocomplete="email" required />
+    </div>
+
+    <div class="field-grid">
+      <label for="contact-subject">subject</label>
+      <input id="contact-subject" name="subject" type="text" required />
+    </div>
+
+    <div class="field-grid">
+      <label for="contact-message">message</label>
+      <textarea id="contact-message" name="message" rows="6" required></textarea>
+    </div>
+
+    <div class="field-grid honeypot" aria-hidden="true">
+      <label for="contact-company">company</label>
+      <input id="contact-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <div class="form-footer">
+      <button id="contact-send-button" type="submit" class="contact-send">Send Message</button>
+      <p id="contact-form-state" class="contact-form-state" data-state="idle" role="status" aria-live="polite"></p>
+    </div>
+  </form>
+</article>
+
+<script>
+  // Frontend handles transport only. No secrets are present here.
+  const form = document.getElementById('contact-form-v2');
+  const submitButton = document.getElementById('contact-send-button');
+  const stateNode = document.getElementById('contact-form-state');
+
+  if (form instanceof HTMLFormElement && submitButton instanceof HTMLButtonElement && stateNode instanceof HTMLParagraphElement) {
+    const setState = (state, message = '') => {
+      stateNode.dataset.state = state;
+      stateNode.textContent = message;
+    };
+
+    const setSubmitting = (isSubmitting) => {
+      submitButton.disabled = isSubmitting;
+      submitButton.textContent = isSubmitting ? 'Sending...' : 'Send Message';
+      form.setAttribute('aria-busy', String(isSubmitting));
+    };
+
+    const generateRequestId = () => {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+      return `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const endpoint = form.dataset.endpoint || '/contact';
+      const formData = new FormData(form);
+
+      // Honeypot trap: silently accept to avoid bot feedback loops.
+      if (String(formData.get('company') ?? '').trim()) {
+        form.reset();
+        setState('success', 'Message sent successfully.');
+        return;
+      }
+
+      const payload = {
+        requestId: generateRequestId(),
+        name: String(formData.get('name') ?? '').trim(),
+        email: String(formData.get('email') ?? '').trim(),
+        subject: String(formData.get('subject') ?? '').trim(),
+        message: String(formData.get('message') ?? '').trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      if (!payload.name || !payload.email || !payload.subject || !payload.message) {
+        setState('error', 'All fields are required.');
+        return;
+      }
+
+      setSubmitting(true);
+      setState('sending', 'Submitting message...');
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            accept: 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(typeof data?.error === 'string' ? data.error : 'Submission failed.');
+        }
+
+        form.reset();
+        setState('success', data?.status === 'duplicate' ? 'Already received. No duplicate created.' : 'Message sent successfully.');
+      } catch (error) {
+        setState('error', error instanceof Error ? error.message : 'Submission failed.');
+      } finally {
+        setSubmitting(false);
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact-form-v2 {
+    padding: 1rem;
+  }
+
+  .contact-form-v2 h2 {
+    margin: 0 0 0.8rem;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+  }
+
+  #contact-form-v2 {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .field-grid {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .field-grid label {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: "IBM Plex Mono", "Fira Code", monospace;
+  }
+
+  .field-grid input,
+  .field-grid textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 0.38rem;
+    background: #0f0f12;
+    color: var(--text);
+    padding: 0.5rem 0.58rem;
+    font: inherit;
+  }
+
+  .field-grid textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .field-grid input:focus,
+  .field-grid textarea:focus {
+    outline: 1px solid var(--accent);
+    border-color: var(--accent);
+  }
+
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .form-footer {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .contact-send {
+    justify-self: start;
+    min-height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 0.35rem;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.9rem;
+    padding: 0.42rem 0.72rem;
+    cursor: pointer;
+  }
+
+  .contact-send:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .contact-send:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  .contact-form-state {
+    margin: 0;
+    min-height: 1.2rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .contact-form-state[data-state='success'] {
+    color: #8bcf9c;
+  }
+
+  .contact-form-state[data-state='error'] {
+    color: #f39ba8;
+  }
+</style>

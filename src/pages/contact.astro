@@ -1,13 +1,85 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/contact/ContactForm.astro';
 ---
 
-<BaseLayout title="Contact | Senior Odoo Integration Engineer" description="Open to ERP integration and backend architecture opportunities.">
-  <section>
-    <p class="section-label">Contact</p>
-    <h1>Available for ERP Integration & Backend Architecture Roles</h1>
-    <p>Email: <a href="mailto:hello@example.com">hello@example.com</a></p>
-    <p>LinkedIn: <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">linkedin.com/in/your-profile</a></p>
-    <p>GitHub: <a href="https://github.com" target="_blank" rel="noreferrer">github.com/your-handle</a></p>
+<BaseLayout title="Contact | Senior Odoo Integration Engineer" description="Contact for backend integration and architecture discussions.">
+  <section class="contact-v2-layout" aria-label="Contact overview and submission form">
+    <section class="surface-card contact-v2-profile">
+      <p class="section-label">Contact</p>
+      <h1>Contact — Integration Engineering</h1>
+      <p class="profile-text">
+        I design and stabilize production Odoo integrations with queue-driven processing, idempotent workflows,
+        and reliability-focused backend architecture.
+      </p>
+
+      <div class="profile-links" aria-label="Primary contact links">
+        <p>
+          <span class="meta-line">Email</span>
+          <a href="mailto:dev@amankarn.in">dev@amankarn.in</a>
+        </p>
+        <p>
+          <span class="meta-line">GitHub</span>
+          <a href="https://github.com/amnkrn" target="_blank" rel="noreferrer">github.com/amnkrn</a>
+        </p>
+        <p>
+          <span class="meta-line">LinkedIn</span>
+          <a href="https://linkedin.com/in/amnkrn" target="_blank" rel="noreferrer">linkedin.com/in/amnkrn</a>
+        </p>
+      </div>
+
+      <p class="availability-note">
+        Open to backend integration roles and architecture discussions.
+      </p>
+    </section>
+
+    <ContactForm />
   </section>
 </BaseLayout>
+
+<style>
+  .contact-v2-layout {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 0.85rem;
+    align-items: start;
+  }
+
+  .contact-v2-profile {
+    padding: 1rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .contact-v2-profile h1 {
+    margin: 0;
+  }
+
+  .profile-text {
+    margin: 0;
+    color: var(--text-muted);
+    max-width: 70ch;
+  }
+
+  .profile-links {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .profile-links p {
+    margin: 0;
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .availability-note {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 980px) {
+    .contact-v2-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

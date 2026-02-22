@@ -1,0 +1,6 @@
+name = "amankarn-contact-proxy"
+main = "worker.js"
+compatibility_date = "2026-02-21"
+
+[vars]
+ALLOWED_ORIGINS = "http://localhost:4321,https://yourdomain.com"
