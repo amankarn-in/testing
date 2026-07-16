@@ -10,8 +10,8 @@ const rawBase = process.env.PUBLIC_BASE_PATH ?? (isUserSite ? '/' : `/${reposito
 const base = rawBase === '/' ? '/' : `/${rawBase.replace(/^\/|\/$/g, '')}/`;
 
 export default defineConfig({
-  site: 'https://amankarn-in.github.io',
-  base: '/testing/',
+  site: 'https://amankarn.in',
+  base: '/',
   output: 'static',
   trailingSlash: 'always',
   integrations: [mdx(), sitemap()]
