@@ -18,7 +18,7 @@ const rawBase = import.meta.env.BASE_URL;
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
 
-<ContentLayout title={`${post.data.title} | Blog`} description={post.data.description}>
+<ContentLayout title={`${post.data.title} | Blog`} description={post.data.description} enableMermaid>
   <p><a href={`${base}blog/`}>← Back to Blog</a></p>
   <p class="meta-line">{post.data.pubDate.toLocaleDateString('en-US', { dateStyle: 'long' })}</p>
   <h1>{post.data.title}</h1>

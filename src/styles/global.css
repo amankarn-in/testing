@@ -346,6 +346,7 @@ h2 {
 .content-layout {
   display: grid;
   gap: 1rem;
+  min-width: 0;
 }
 
 .content-layout.with-sidebar {
@@ -357,6 +358,7 @@ h2 {
   border: 1px solid var(--border);
   border-radius: 0.8rem;
   background: var(--surface);
+  min-width: 0;
 }
 
 .content-sidebar {
@@ -395,9 +397,12 @@ h2 {
   border-radius: 14px;
   padding: 24px;
   margin: 32px 0;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .mermaid svg {
+  display: block;
   max-width: 100%;
   height: auto;
 }
