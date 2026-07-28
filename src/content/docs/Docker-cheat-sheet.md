@@ -14,40 +14,39 @@ This document defines a baseline reference for Docker architecture, components, 
 
 <div class="mermaid">
 flowchart LR
-  subgraph Client
-    A[Docker Client]
-  end
-  
-  subgraph Docker Host
-    B[Docker Daemon]
-    C[Images]
-    D[Containers]
-  end
-  
-  subgraph Registry
-    E[Docker Hub / Private Registry]
+  subgraph client["Client"]
+    docker_client["Docker Client"]
   end
 
-  A -->|docker build / pull / run| B
-  B -->|Creates| C
-  B -->|Runs| D
-  B <-->|Pull / Push| E
+  subgraph docker_host["Docker Host"]
+    docker_daemon["Docker Daemon"]
+    images["Images"]
+    containers["Containers"]
+  end
+
+  subgraph registry["Registry"]
+    docker_registry["Docker Hub / Private Registry"]
+  end
+
+  docker_client -->|"docker build / pull / run"| docker_daemon
+  docker_daemon -->|Creates| images
+  docker_daemon -->|Runs| containers
+  docker_daemon <-->|Pull / Push| docker_registry
 </div>
-
 ---
 
 ## Basics of Docker
 
-*   Docker is an open-source centralized platform designed to create, deploy, and run applications[cite: 1].
-*   It was first released in March 2013 and developed by Solomon Hykes and Sebastien Paul[cite: 1].
-*   The tool performs OS-level virtualization, which is also known as containerization[cite: 1].
-*   Docker is written in the 'GO' language[cite: 1].
-*   It utilizes containers on the host operating system to run applications, sharing the same Linux Kernel instead of creating a full virtual operating system[cite: 1].
-*   The Docker engine runs natively on Linux distributions, though it can be installed on any operating system[cite: 1].
-*   Before Docker, users faced issues where code would run on a developer's system but fail on the user's system[cite: 1].
-*   When an image is running, it is called a container[cite: 1].
-*   When a container is in a non-runnable state, it is referred to as an image[cite: 1].
-*   An image serves as a template, and the container is a copy of that template holding the entire package needed to run the application[cite: 1].
+*   Docker is an open-source centralized platform designed to create, deploy, and run applications.
+*   It was first released in March 2013 and developed by Solomon Hykes and Sebastien Paul.
+*   The tool performs OS-level virtualization, which is also known as containerization.
+*   Docker is written in the 'GO' language.
+*   It utilizes containers on the host operating system to run applications, sharing the same Linux Kernel instead of creating a full virtual operating system.
+*   The Docker engine runs natively on Linux distributions, though it can be installed on any operating system.
+*   Before Docker, users faced issues where code would run on a developer's system but fail on the user's system.
+*   When an image is running, it is called a container.
+*   When a container is in a non-runnable state, it is referred to as an image.
+*   An image serves as a template, and the container is a copy of that template holding the entire package needed to run the application.
 
 ---
 
@@ -55,21 +54,21 @@ flowchart LR
 
 | Advantages | Disadvantages |
 | :--- | :--- |
-| Requires no pre-allocation of RAM[cite: 1]. | Not a good solution for applications requiring a rich GUI[cite: 1]. |
-| Provides CI Efficiency by allowing the same container image to be used across every deployment step[cite: 1]. | Difficult to manage a large number of containers[cite: 1]. |
-| Results in less cost and is lightweight[cite: 1]. | Lacks cross-platform compatibility (e.g., Windows containers cannot run on Linux)[cite: 1]. |
-| Can run on physical hardware, virtual hardware, or in the cloud[cite: 1]. | Requires Virtual Machines if the development OS and testing OS are different[cite: 1]. |
-| Images can be re-used and container creation takes very little time[cite: 1]. | Does not provide a built-in solution for Data Recovery and Backup[cite: 1]. |
+| Requires no pre-allocation of RAM. | Not a good solution for applications requiring a rich GUI. |
+| Provides CI Efficiency by allowing the same container image to be used across every deployment step. | Difficult to manage a large number of containers. |
+| Results in less cost and is lightweight. | Lacks cross-platform compatibility (e.g., Windows containers cannot run on Linux). |
+| Can run on physical hardware, virtual hardware, or in the cloud. | Requires Virtual Machines if the development OS and testing OS are different. |
+| Images can be re-used and container creation takes very little time. | Does not provide a built-in solution for Data Recovery and Backup. |
 
 ---
 
 ## Core Components
 
-*   **Docker Daemon:** Runs on the Host OS and is responsible for running containers and managing Docker services[cite: 1]. Docker daemons can communicate with other daemons[cite: 1].
-*   **Docker Client:** Uses commands and Rest APIs to allow users to interact and communicate with the Docker daemon[cite: 1]. A client can communicate with more than one daemon[cite: 1].
-*   **Docker Host:** Provides the environment to execute applications and contains the docker daemon, images, containers, networks, and storage[cite: 1].
-*   **Docker Hub/Registry:** Manages and stores Docker images[cite: 1]. Registries can be Public (Docker Hub) or Private (used within an enterprise)[cite: 1].
-*   **Docker Images:** Read-only binary templates used to create containers, containing all dependencies and configurations required to run a program[cite: 1].
+*   **Docker Daemon:** Runs on the Host OS and is responsible for running containers and managing Docker services. Docker daemons can communicate with other daemons.
+*   **Docker Client:** Uses commands and Rest APIs to allow users to interact and communicate with the Docker daemon. A client can communicate with more than one daemon.
+*   **Docker Host:** Provides the environment to execute applications and contains the docker daemon, images, containers, networks, and storage.
+*   **Docker Hub/Registry:** Manages and stores Docker images. Registries can be Public (Docker Hub) or Private (used within an enterprise).
+*   **Docker Images:** Read-only binary templates used to create containers, containing all dependencies and configurations required to run a program.
 
 ---
 
@@ -88,7 +87,7 @@ RUN <command>
 # Executes a command as part of the build process (exec form)[cite: 2]
 RUN ["exec", "param1", "param2"]
 
-# Defines the Author, Owner, or Description[cite: 1]
+# Defines the Author, Owner, or Description
 MAINTAINER <name>
 
 # Executes a command when the container starts[cite: 1, 2]
@@ -109,7 +108,7 @@ COPY <src> <dest>
 # Copies files from a build stage to a destination[cite: 2]
 COPY --from=<name> <src> <dest>
 
-# Similar to COPY, but provides features to download files from the internet and extract files[cite: 1]
+# Similar to COPY, but provides features to download files from the internet and extract files
 ADD <src> <dest>
 
 # Sets the working directory for a container[cite: 1, 2]
@@ -144,7 +143,7 @@ HEALTHCHECK <command>
 # Create and run a new container[cite: 2]
 docker run <image>
 
-# Gives a name to the container and runs in interactive mode directed to the terminal[cite: 1]
+# Gives a name to the container and runs in interactive mode directed to the terminal
 docker run -it --name <container_name> <image_name> /bin/bash
 
 # Run a container in the background[cite: 2]
@@ -182,7 +181,7 @@ docker rm <container name>
 ### Executing Commands in a Container
 
 ```bash
-# Go inside the container by connecting the standard I/O of the main process to the terminal[cite: 1]
+# Go inside the container by connecting the standard I/O of the main process to the terminal
 docker attach <container_name>
 
 # Execute a command in a running container[cite: 2]
@@ -230,17 +229,17 @@ docker images
 docker rmi <image>
 # Alternatively: docker image rm <image>
 
-# Create an image of a running container[cite: 1]
+# Create an image of a running container
 docker commit <container_name> <container_image_name>
 
-# Check differences between base image and container changes[cite: 1]
+# Check differences between base image and container changes
 docker diff <old_container_name>
 ```
 
 ### System Commands
 
 ```bash
-# Check whether the Docker service is starting or not[cite: 1]
+# Check whether the Docker service is starting or not
 service docker status
 
 # Show Docker disk usage[cite: 2]
@@ -344,38 +343,38 @@ docker scout compare --to <image_name>:latest <image_name>:v1.2.3-pre
 
 ## Docker Volumes
 
-Volumes are simply directories inside a container used to decouple containers from storage[cite: 1]. 
+Volumes are simply directories inside a container used to decouple containers from storage. 
 
-*   Directories must be declared as a volume during container creation; they cannot be created from an existing container[cite: 1].
-*   Volumes can be accessed even if the container is stopped, and they are not deleted when the container is deleted[cite: 1].
-*   Volumes are not included when you update an image[cite: 1].
-*   Volumes can be shared across multiple containers (Container to Container) or mapped from the host (Host to Container)[cite: 1].
+*   Directories must be declared as a volume during container creation; they cannot be created from an existing container.
+*   Volumes can be accessed even if the container is stopped, and they are not deleted when the container is deleted.
+*   Volumes are not included when you update an image.
+*   Volumes can be shared across multiple containers (Container to Container) or mapped from the host (Host to Container).
 
 ### Volume Commands
 
 ```bash
-# Create a standard Docker volume[cite: 1]
+# Create a standard Docker volume
 docker volume create <volume_name>
 
-# List all volumes[cite: 1]
+# List all volumes
 docker volume ls
 
-# Inspect a volume for details[cite: 1]
+# Inspect a volume for details
 docker volume inspect <volume_name>
 
-# Inspect a container for details[cite: 1]
+# Inspect a container for details
 docker container inspect <container_name>
 
-# Remove a specific volume[cite: 1]
+# Remove a specific volume
 docker volume rm <volume_name>
 
-# Prune all unused volumes[cite: 1]
+# Prune all unused volumes
 docker volume prune
 
-# Run a container with a shared volume from another container[cite: 1]
+# Run a container with a shared volume from another container
 docker run -it --name <container_name> --privileged=true --volumes-from <container_name> <os_image_name> /bin/bash
 
-# Run a container and map a host directory to a container volume[cite: 1]
+# Run a container and map a host directory to a container volume
 docker run -it --name <container_name> -v /home/ec2-user:/<volume_name> --privileged=true <os_name> /bin/bash
 ```
 
@@ -383,8 +382,8 @@ docker run -it --name <container_name> -v /home/ec2-user:/<volume_name> --privil
 
 ## Execution vs. Attachment & Port Exposing
 
-*   **`docker attach` vs `docker exec`:** The `exec` command creates a new process in the container's environment, suitable for running new shells or processes[cite: 1]. The `attach` command connects the standard I/O of the main process inside the container to the current terminal[cite: 1].
-*   **No exposure or publish (`-p`):** The service is only accessible from inside the container itself[cite: 1].
-*   **`expose` only:** The service is accessible from inside other Docker containers (inter-container communication), but not from outside Docker[cite: 1].
-*   **`expose` and `-p`:** The service is accessible from anywhere, including outside Docker[cite: 1].
-*   **Implicit Exposure:** If you publish a port (`-p`) but do not explicitly expose it, Docker performs an implicit expose, meaning a public port is automatically open to other Docker containers[cite: 1].
+*   **`docker attach` vs `docker exec`:** The `exec` command creates a new process in the container's environment, suitable for running new shells or processes. The `attach` command connects the standard I/O of the main process inside the container to the current terminal.
+*   **No exposure or publish (`-p`):** The service is only accessible from inside the container itself.
+*   **`expose` only:** The service is accessible from inside other Docker containers (inter-container communication), but not from outside Docker.
+*   **`expose` and `-p`:** The service is accessible from anywhere, including outside Docker.
+*   **Implicit Exposure:** If you publish a port (`-p`) but do not explicitly expose it, Docker performs an implicit expose, meaning a public port is automatically open to other Docker containers.
